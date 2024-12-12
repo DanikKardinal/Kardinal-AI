@@ -1,1 +1,246 @@
+import sqlite3
+import requests
+import json
+import peewee
+import time
 
+# === Настройки AmoCRM ===
+AMOCRM_Latoken= 'your_latokenCRM'  # Например, 'example'
+ACCESS_TOKEN = 'your_access_token'
+def url: gitlab.latoken.com\
+from celery import shared_task
+from .whatsapp_api import WhatsAppAPI
+from .utils import save_managers_to_db, save_leads_to_db
+
+@shared_task
+def sync_whatsapp_data():
+    api = WhatsAppAPI(
+        access_token=
+    api = WhatsAppAPI(
+
+# === Шаг 1: Создание базы данных SQLite и таблицы ===
+def create_table(LatokenCopyDB):
+    conn = sqlite3.connect('main_database.db')  # Основная база данных
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS my_table (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            column1 TEXT,
+            column2 TEXT,
+            column3 TEXT,
+            column4 TEXT,
+            column5 TEXT,
+            column6 TEXT,
+            column7 TEXT,
+            column8 TEXT,
+            column9 TEXT,
+            column10 TEXT,
+            column11 TEXT,
+            column12 TEXT,
+            column13 TEXT,
+            column14 TEXT,
+            column15 TEXT,
+            column16 TEXT,
+            column17 TEXT,
+            column18 TEXT,
+            column19 TEXT,
+            column20 TEXT,
+            column21 TEXT,
+            column22 TEXT,
+            column23 TEXT,
+            column24 TEXT,
+            column25 TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+# === Шаг 2: Копирование данных из другой SQLite-базы ===
+def copy_data_from_another_db():
+    conn = sqlite3.connect('main_database.db')  # Основная база данных
+    cursor = conn.cursor()
+
+    from .models import Contact
+
+def save_contacts_to_db(contacts_data):
+    contacts = contacts_data.get("_embedded", {}).get("contacts", [])
+    for contact in contacts:
+        email = next((field["values"][0]["value"] for field in contact.get("custom_fields_values", []) if field["field_type"] == "email"), None)
+        phone = next((field["values"][0]["value"] for field in contact.get("custom_fields_values", []) if field["field_type"] == "phone"), None)
+
+        Contact.objects.update_or_create(
+            amocrm_id=contact["id"],
+            defaults={
+                "name": contact.get("name", "Unnamed"),
+                "email": email,
+                "phone": phone,
+            }
+        )
+
+    # Подключение другой базы данных
+    another_conn = sqlite3.connect('another_database.db')  # Другая база данных
+    another_cursor = another_conn.cursor()
+
+    another_cursor.execute("SELECT columnA, columnB, columnC FROM source_table")
+    rows = another_cursor.fetchall()
+
+    # Вставка данных в основную таблицу
+    for row in rows:
+        cursor.execute("""
+            INSERT INTO my_table (column1, column2, column3)
+            VALUES (?, ?, ?)
+        """, row)
+
+    conn.commit()
+    another_conn.close()
+    conn.close()
+
+# === Шаг 3: Создание индекса для ускорения поиска ===
+def create_index():
+    conn = sqlite3.connect('main_database.db')
+    cursor = conn.cursor()
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_column2 ON my_table(column2)")
+    conn.commit()
+    conn.close()
+
+# === Шаг 4: Поиск данных в SQLite ===
+def search_data(keyword):
+    conn = sqlite3.connect('main_database.p)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM my_table WHERE column2 LIKE ?", ('%' + keyword + '%',))
+    results = cursor.fetchall()
+    conn.close()
+    return results
+
+
+# Добавить функцию привязки лида с менеджером из ватсап
+
+
+# === Шаг 5: Отправка данных в AmoCRM ===
+def add_deal_to_amocrm(name, price, status_id):
+    url = f"https://{AMOCRM_SUBDOMAIN}.amocrm.ru/api/v4/leads"
+    headers = {
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "name": name,
+        "price": price,
+        "status_id": status_id
+    }
+    response = requests.post(url, headers=headers, data=json.dumps([data]))
+    if response.status_code == 201:
+        print(f"Сделка '{name}' успешно добавлена!")
+    else:
+        print(f"Ошибка: {response.status_code}, {response.text}")
+
+# Выгрузка из AmoCrm в Базу Данных  и наоборот при необходимости
+def
+# === Шаг 7: Основная программа ===
+if __name__ == "__main__":
+    create_table()
+    copy_data_from_another_db()
+    create_index()
+
+    # Поиск данных в SQLite
+    keyword = "Banana"
+    results = search_data(keyword)
+    print(f"Найденные записи: {results}")
+
+    # Отправка данных в AmoCRM
+    send_data_to_amocrm()
+from celery import shared_task
+from .amocrm import AmoCRM
+from .utils import save_contacts_to_db
+
+@shared_task
+def sync_contacts_task():
+    # Настройки токенов и клиента
+    amocrm = AmoCRM(
+        access_token="YOUR_ACCESS_TOKEN",
+        refresh_token="YOUR_REFRESH_TOKEN",
+        client_id="YOUR_CLIENT_ID",
+        client_secret="YOUR_CLIENT_SECRET",
+        redirect_uri="YOUR_REDIRECT_URI"
+    )
+    contacts_data = amocrm.fetch_contacts()
+    if contacts_data:
+        save_contacts_to_db(contacts_data)
+from .models import Contact
+
+def save_contacts_to_db(contacts_data):
+    contacts = contacts_data.get("_embedded", {}).get("contacts", [])
+    for contact in contacts:
+        email = next((field["values"][0]["value"] for field in contact.get("custom_fiel ds_values", []) if field["field_type"] == "email"), None)
+        phone = next((field["values"][0]["value"] for field in contact.get("custom_fields_values", []) if field["field_type"] == "phone"), None)
+
+        Contact.objects.update_or_create(
+            amocrm_id=contact["id"],
+            defaults={
+                "name": contact.get("name", "Unnamed"),
+                "email": email,
+                "phone": phone,
+            }
+        )
+
+import sqlite3
+import time
+from datetime import datetime
+
+# Настройка соединения с исходной базой данных
+def connect_source_db():
+    return sqlite3.connect("source.db")
+
+# Настройка соединения с целевой базой данных
+def connect_target_db():
+    return sqlite3.connect("target.db")
+
+# Функция для проверки новых данных в исходной базе
+def fetch_new_data(conn):
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM data WHERE processed = 0")  # Таблица data, колонка processed
+    return cursor.fetchall()
+
+# Функция для записи данных в целевую базу
+def insert_into_target(conn, data):
+    cursor = conn.cursor()
+    for row in data:
+        cursor.execute("INSERT INTO data VALUES (?, ?, ?, ?, ?, ?)", row)  # Предполагается 6 колонки
+    conn.commit()
+
+# Функция для отметки данных как обработанных
+def mark_data_as_processed(conn, data):
+    cursor = conn.cursor()
+    for row in data:
+        cursor.execute("UPDATE data SET processed = 1 WHERE id = ?", (row[0],))
+    conn.commit()
+
+# Главный цикл базы данных, во время проверки новых данных
+def main():
+    while True:
+        print(f"[{datetime.now()}] Проверка новых данных...")
+
+        # Соединения с базой данных и чек
+        source_conn = connect_source_db()
+        target_conn = connect_target_db()
+
+        try:
+            new_data = fetch_new_data(source_conn)
+            if new_data:
+                print(f"Найдено {len(new_data)} новых записей. Перенос данных...")
+                insert_into_target(target_conn, new_data)
+                mark_data_as_processed(source_conn, new_data)
+                print("Данные успешно перенесены и отмечены как обработанные.")
+            else:
+                print("Новых данных нет.")
+        except Exception as e:
+            print(f"Ошибка при неизвестном сценарии!!: {e}")
+        finally:
+            source_conn.close()
+            target_conn.close()
+
+        time.sleep(60)  # Ожидание до 1 минуты
+
+if __name__ == "__main__":
+    main()
+#Добавить реализацию от амосрм и ватсап, для связки с менеджером лида
